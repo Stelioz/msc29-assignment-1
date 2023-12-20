@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Load the grayscale image
+# Φόρτωση εικόνας από τον φάκελο image\
 image = cv2.imread('images\cameraman.bmp')
 
 # Function to perform uniform scalar average-stepping quantization
