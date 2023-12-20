@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # Φόρτωση εικόνας από τον φάκελο image\
 image = cv2.imread('images\cameraman.bmp')
 
-# Function to perform uniform scalar average-stepping quantization
+# Συνάρτηση για τη δημιουργία του ομοιόμορφου βαθμωτού κβαντιστή μέσου πατήματος
 def quantize(image, levels):
     quantized_image = np.zeros_like(image)
     for i in range(levels):
@@ -14,11 +14,11 @@ def quantize(image, levels):
         quantized_image[(image >= lower_bound) & (image < upper_bound)] = (lower_bound + upper_bound) // 2
     return quantized_image
 
-# Function to calculate mean squared quantization error
+# Συνάρτηση για τον υπολογισμό του μέσου τετραγωνικού σφάλματος κβάντισης
 def calculate_mse(original, quantized):
     return np.mean((original - quantized) ** 2)
 
-# Quantization levels
+# Στάθμες κβάντισης
 quantization_levels = [7, 11, 15, 19]
 
 # Plot the transformation function for each quantizer
