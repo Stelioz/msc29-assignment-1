@@ -34,8 +34,8 @@ plt.show()
 percentages = [0.2, 0.4, 0.6, 0.8]
 mse_values = []
 
-# Ανακατασκευή της αρχικής εικόνας
-plt.figure(figsize=(15, 5 * len(percentages)))
+# Δημιουργία του καμβά του σχήματος
+plt.figure(figsize=(20, 20))
 
 for i, percentage in enumerate(percentages, 1):
     # Δημιουργία μάσκας για την αποκοπή των υψηλών συντελεστών
