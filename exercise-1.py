@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Φόρτωση εικόνας από τον φάκελο image\
-image = cv2.imread('images\cameraman.bmp')
+image = cv2.imread('images\cameraman.bmp', cv2.IMREAD_GRAYSCALE)
 
 # Συνάρτηση για τη δημιουργία του ομοιόμορφου βαθμωτού κβαντιστή μέσου πατήματος
 def quantize(image, levels):
@@ -13,10 +13,6 @@ def quantize(image, levels):
         upper_bound = (i + 1) * (256 // levels)
         quantized_image[(image >= lower_bound) & (image < upper_bound)] = (lower_bound + upper_bound) // 2
     return quantized_image
-
-# Συνάρτηση για τον υπολογισμό του μέσου τετραγωνικού σφάλματος κβάντισης
-def calculate_mse(original, quantized):
-    return np.mean((original - quantized) ** 2)
 
 # Στάθμες κβάντισης
 quantization_levels = [7, 11, 15, 19]
@@ -45,7 +41,8 @@ plt.title('Αρχική Εικόνα')
 # Σχεδιασμός των κβαντισμένων εικόνων
 for i, levels in enumerate(quantization_levels, 1):
     quantized_image = quantize(image, levels)
-    mse = calculate_mse(image, quantized_image)
+    # Υπολογισμός του μέσου τετραγωνικού σφάλματος (MSE)
+    mse = np.mean((image - quantized_image) ** 2)
 
     plt.subplot(1, len(quantization_levels) + 1, i + 1)
     plt.imshow(quantized_image, cmap='gray')
