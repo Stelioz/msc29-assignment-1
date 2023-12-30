@@ -13,7 +13,7 @@ dft_shift = np.fft.fftshift(dft)
 amplitude_spectrum = np.abs(dft)
 phase_spectrum = np.angle(dft_shift)
 
-# Εμφάνιση της αρχικής εικόνας, του φάσματος πλάτους και του φάσματος φάσης
+# Εμφάνιση της αρχικής εικόνας, του φάσματος πλάτους και φάσης αυτής
 plt.figure(figsize=(15, 5))
 
 plt.subplot(1, 3, 1)
@@ -56,6 +56,7 @@ for i, percentage in enumerate(percentages, 1):
     mse = np.mean((image - reconstructed_image) ** 2)
     mse_values.append(mse)
 
+    # Εμφάνιση των ανακατασκευασμένων εικόνων, του φάσματος πλάτους και φάσης αυτών
     plt.subplot(len(percentages), 3, (i - 1) * 3 + 1)
     plt.imshow(reconstructed_image, cmap='gray')
     plt.title(f'Εικόνα με {percentage * 100}% των συντελεστών DFT\nMSE: {mse:.2f}')
