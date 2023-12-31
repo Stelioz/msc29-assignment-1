@@ -39,7 +39,7 @@ plt.figure(figsize=(20, 20))
 
 plt.subplot(1, len(percentages) + 1, 1)
 plt.imshow(image, cmap='gray')
-plt.title('Original Image')
+plt.title('Αρχική Εικόνα')
 
 for i, percentage in enumerate(percentages, 1):
     # Δημιουργία μάσκας για την αποκοπή των υψηλών συντελεστών
