@@ -65,6 +65,6 @@ for i, percentage in enumerate(percentages, 1):
     # Εμφάνιση των ανακατασκευασμένων εικόνων, του φάσματος πλάτους και φάσης
     plt.subplot(1, len(percentages) + 1, i + 1)
     plt.imshow(reconstructed_image, cmap='gray')
-    plt.title(f'Εικόνα με {percentage * 100:.0f}% Συντελεστές')
+    plt.title(f'Εικόνα με {percentage * 100:.0f}% Συντελεστές\nMSE: {mse:.2f}')
 
 plt.show()
