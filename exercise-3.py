@@ -1,17 +1,19 @@
 import cv2
 import numpy as np
+from scipy.fftpack import dct, idct
 import matplotlib.pyplot as plt
 
-# Φόρτωση εικόνας από τον φάκελο image\
-image = cv2.imread('images\cameraman.bmp', cv2.IMREAD_GRAYSCALE)
+# Φόρτωση εικόνας από τον φάκελο image\ και μετατροπή σε float32
+image = cv2.imread('images/cameraman.bmp', cv2.IMREAD_GRAYSCALE)
+image_32 = image.astype(np.float32)
 
-# Υπολογισμός του 2D μετασχηματισμού Fourier (DFT)
-dft = np.fft.fft2(image)
-dft_shift = np.fft.fftshift(dft)
+# Υπολογισμός του 2D DCT και του 2D IDCT
+dct2D = dct(dct(image_32.T, norm='ortho').T, norm='ortho')
+idct2D = idct(idct(dct2D.T, norm='ortho').T, norm='ortho')
 
 # Υπολογισμός του φάσματος πλάτους και του φάσματος φάσης
-magnitude_spectrum = np.abs(dft_shift)
-phase_spectrum = np.angle(dft_shift)
+magnitude_spectrum = np.abs(dct2D)
+phase_spectrum = np.angle(dct2D)
 
 # Εμφάνιση της αρχικής εικόνας, του φάσματος πλάτους και φάσης αυτής
 plt.figure(figsize=(15, 5))
@@ -30,7 +32,7 @@ plt.title('Φάσμα Φάσης')
 
 plt.show()
 
-# Ποσοστά των συντελεστών DFT (20%, 40%, 60%, 80%)
+# Ποσοστά των συντελεστών DCT (20%, 40%, 60%, 80%)
 percentages = [0.2, 0.4, 0.6, 0.8]
 
 # Δημιουργία του καμβά του σχήματος
@@ -42,28 +44,24 @@ plt.title('Αρχική Εικόνα')
 
 for i, percentage in enumerate(percentages, 1):
     # Δημιουργία μάσκας για την αποκοπή των υψηλών συντελεστών
-    rows, cols = image.shape
-    mask_rows = int(rows * percentage)
-    mask_cols = int(cols * percentage)
-    mask = np.zeros((rows, cols), dtype=np.uint8)
-    mask[rows // 2 - mask_rows // 2: rows // 2 + mask_rows // 2,
-         cols // 2 - mask_cols // 2: cols // 2 + mask_cols // 2] = 1
+    mask_rows = int(dct2D.shape[0] * percentage)
+    mask_cols = int(dct2D.shape[1] * percentage)
+    mask = np.zeros_like(dct2D)
+    mask[:mask_rows, :mask_cols] = 1
 
     # Εφαρμογή της μάσκας
-    masked_dft_shift = dft_shift * mask
+    masked_coefficients = dct2D * mask
 
-    # Χρήση του αντίστροφου μετασχηματισμού Fourier
-    inverse_shifted = np.fft.ifftshift(masked_dft_shift)
-    inverse_result = np.fft.ifft2(inverse_shifted)
-    reconstructed_image = np.abs(inverse_result)
+    # Χρήση του 2D IDCT
+    reconstructed_image = idct(idct(masked_coefficients.T, norm='ortho').T, norm='ortho')
 
     # Υπολογισμός του μέσου τετραγωνικού σφάλματος (MSE)
-    mse = np.mean((image - reconstructed_image) ** 2)
+    mse = np.mean((image_32 - reconstructed_image) ** 2)
     print(f'{percentage * 100:.0f}% MSE: {mse:.4f}')
 
-    # Εμφάνιση των ανακατασκευασμένων εικόνων, του φάσματος πλάτους και φάσης
+    # Εμφάνιση των ανακατασκευασμένων εικόνων
     plt.subplot(1, len(percentages) + 1, i + 1)
     plt.imshow(reconstructed_image, cmap='gray')
-    plt.title(f'Εικόνα με {percentage * 100:.0f}% Συντελεστές\nMSE: {mse:.2f}')
+    plt.title(f'Εικόνα με {percentage * 100:.0f}% Συντελεστές\nMSE: {mse:.4f}')
 
 plt.show()
