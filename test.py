@@ -2,39 +2,35 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-def calculate_dct(F_dft):
-    M, N = F_dft.shape
-
-    # Initialize DCT coefficients array
+# Συνάρτηση υπολογισμού 2D DCT
+def dct2D(image):
+    M, N = image.shape
+    # Αρχικοποίηση του πίνακα
     F_dct = np.zeros((M, N), dtype=np.complex128)
-
-    # Calculate DCT coefficients using the provided formula
     for k in range(M):
         for l in range(N):
-            # Compute scaling factors
+            # Επέκταση της εικόνας
             W_k = np.exp(-1j * 2 * np.pi * k / (2 * M))
             W_l = np.exp(-1j * 2 * np.pi * l / (2 * N))
 
-            # Apply the formula to calculate DCT coefficients
-            F_dct[k, l] = W_k**(k / 2) * W_l**(l / 2) * F_dft[k, l]
+            # Χρήση του μαθηματικού τύπου
+            F_dct[k, l] = W_k**(k / 2) * W_l**(l / 2) * image[k, l]
 
     return F_dct
 
-def calculate_idct(F_dct):
-    M, N = F_dct.shape
-
-    # Initialize IDCT coefficients array
+# Συνάρτηση υπολογισμού 2D IDCT
+def idct2D(image):
+    M, N = image.shape
+    # Αρχικοποίηση του πίνακα
     F_idct = np.zeros((M, N), dtype=np.complex128)
-
-    # Calculate IDCT coefficients using the inverse formula
     for k in range(M):
         for l in range(N):
-            # Compute scaling factors
+            # Επέκταση της εικόνας
             W_k = np.exp(1j * 2 * np.pi * k / (2 * M))
             W_l = np.exp(1j * 2 * np.pi * l / (2 * N))
 
-            # Apply the inverse formula to calculate IDCT coefficients
-            F_idct[k, l] = (W_k**(k / 2) * W_l**(l / 2)) / (M * N) * F_dct[k, l]
+            # Χρήση του μαθηματικού τύπου
+            F_idct[k, l] = (W_k**(k / 2) * W_l**(l / 2)) / (M * N) * image[k, l]
 
     return F_idct
 

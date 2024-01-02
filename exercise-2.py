@@ -59,7 +59,7 @@ for i, percentage in enumerate(percentages, 1):
 
     # Υπολογισμός του μέσου τετραγωνικού σφάλματος (MSE)
     mse = np.mean((image - reconstructed_image) ** 2)
-    print(f'{percentage * 100:.0f}% MSE: {mse:.4f}')
+    print(f'{percentage * 100:.0f}% MSE: {mse:.2f}')
 
     # Εμφάνιση των ανακατασκευασμένων εικόνων, του φάσματος πλάτους και φάσης
     plt.subplot(1, len(percentages) + 1, i + 1)
