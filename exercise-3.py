@@ -4,7 +4,7 @@ from scipy.fftpack import dct, idct
 import matplotlib.pyplot as plt
 
 # Φόρτωση εικόνας από τον φάκελο image\ και μετατροπή σε float32
-image = cv2.imread('images/cameraman.bmp', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('images\cameraman.bmp', cv2.IMREAD_GRAYSCALE)
 image_32 = image.astype(np.float32)
 
 # Υπολογισμός του 2D DCT και του 2D IDCT

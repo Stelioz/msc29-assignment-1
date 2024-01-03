@@ -23,7 +23,7 @@ def noise_adder(image, density):
 
 
 # Φόρτωση εικόνας από τον φάκελο image\
-image = cv2.imread('images/lenna.bmp', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('images\lenna.bmp', cv2.IMREAD_GRAYSCALE)
 
 # Προσθήκη θορύβου salt & pepper
 density = 0.05
