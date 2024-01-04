@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 def dct2D(image):
     M, N = image.shape
     # Αρχικοποίηση του πίνακα
-    F_dct = np.zeros((M, N), dtype=np.complex128)
+    F_dct = np.zeros((M, N), dtype=np.float32)
     for k in range(M):
         for l in range(N):
             # Επέκταση της εικόνας
@@ -22,7 +22,7 @@ def dct2D(image):
 def idct2D(image):
     M, N = image.shape
     # Αρχικοποίηση του πίνακα
-    F_idct = np.zeros((M, N), dtype=np.complex128)
+    F_idct = np.zeros((M, N), dtype=np.float32)
     for k in range(M):
         for l in range(N):
             # Επέκταση της εικόνας

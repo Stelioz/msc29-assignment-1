@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# Συνάρτηση για την προθήκη θορύβου salt & pepper
+# Συνάρτηση για την προσθήκη θορύβου salt & pepper
 def noise_adder(image, density):
     # Μάσκα για τυχαία εμφάνιση του θορύβου εντός της εικόνας
     noise_mask = np.random.rand(*image.shape) < density
@@ -46,11 +46,7 @@ plt.show()
 filter_sizes = [3, 5, 7]
 
 # Δημιουργία του καμβά του σχήματος
-plt.figure(figsize=(20, 5))
-
-plt.subplot(1, len(filter_sizes) + 1, 1)
-plt.imshow(image, cmap='gray')
-plt.title('Αρχική Εικόνα')
+plt.figure(figsize=(15, 5))
 
 for i, size in enumerate(filter_sizes):
     # Δημιουργία του φίλτρου μέσης τιμής και της φιλτραρισμένης εικόνας
@@ -58,7 +54,7 @@ for i, size in enumerate(filter_sizes):
     filtered_image = cv2.filter2D(noisy_image, -1, kernel)
 
     # Εμφάνιση των φιλτραρισμένων εικόνων
-    plt.subplot(1, len(filter_sizes) + 1, i + 2)
+    plt.subplot(1, len(filter_sizes), i + 1)
     plt.imshow(filtered_image, cmap='gray')
     plt.title(f'Φιλτραρισμένη Εικόνα {i + 1}.\nΦίτρο διαστάσεων {size}x{size}')
 
