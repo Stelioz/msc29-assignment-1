@@ -77,6 +77,7 @@ for i, order in enumerate(orders):
     idft = np.fft.ifftshift(idft_shift)
     filtered_image = np.real(np.abs(np.fft.ifft2(idft)))
 
+    # Εμφάνιση των φιλτραρισμένων εικόνων
     plt.subplot(1, len(orders), i + 1)
     plt.imshow(filtered_image, cmap='gray')
     plt.title(f'Φιλτραρισμένη εικόνα {i + 1}.\n Φιλτρο Butterworth {order}ης ταξης')

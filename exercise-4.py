@@ -49,7 +49,7 @@ filter_sizes = [3, 5, 7]
 plt.figure(figsize=(15, 5))
 
 for i, size in enumerate(filter_sizes):
-    # Δημιουργία του φίλτρου μέσης τιμής και της φιλτραρισμένης εικόνας
+    # Δημιουργία του πυρήνα του φίλτρου και της φιλτραρισμένης εικόνας
     kernel = np.ones((size, size), np.float32) / (size * size)
     filtered_image = cv2.filter2D(noisy_image, -1, kernel)
 
