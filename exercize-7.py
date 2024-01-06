@@ -99,7 +99,7 @@ def kirsch_method(image, experiment):
     edges = np.max(stack, axis=-1)
 
     # Υπολογισμός του κατωφλίου με πειραματικό τρόπο
-    _, threshold = cv2.threshold(edges, experiment, 255, cv2.THRESH_BINARY)
+    _, threshold = cv2.threshold(edges, experiment * 100, 255, cv2.THRESH_BINARY)
 
     return threshold
 
@@ -129,11 +129,7 @@ def canny_method(image):
     return edges
 
 
-def main(image):
-    experiment = 30 # Πειραματισμός
-    variance = 1.5  # Πειραματισμός
-    threshold = 20  # Πειραματισμός
-
+def main(image, experiment, variance, threshold):
     # Κλήση των συναρτήσεων sobel_method, roberts_method, prewitt_method και kirsch_method
     sobel = sobel_method(image)
     roberts = roberts_method(image)
@@ -142,11 +138,11 @@ def main(image):
 
     # Εμφάνιση εικόνας cameraman.bmp με χρήση πρώτων παραγώγων
     plt.figure(figsize=(20, 10))
-    plt.subplot(2, 3, 1), plt.imshow(image, cmap='gray'), plt.title('Original')
-    plt.subplot(2, 3, 2), plt.imshow(sobel, cmap='gray'), plt.title('Sobel')
-    plt.subplot(2, 3, 3), plt.imshow(roberts, cmap='gray'), plt.title('Roberts')
-    plt.subplot(2, 3, 4), plt.imshow(prewitt, cmap='gray'), plt.title('Prewitt')
-    plt.subplot(2, 3, 5), plt.imshow(kirsch, cmap='gray'), plt.title('Kirsch')
+    plt.subplot(2, 3, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
+    plt.subplot(2, 3, 2), plt.imshow(sobel, cmap='gray'), plt.title('Ανίχνευση με Sobel')
+    plt.subplot(2, 3, 3), plt.imshow(roberts, cmap='gray'), plt.title('Ανίχνευση με Roberts')
+    plt.subplot(2, 3, 4), plt.imshow(prewitt, cmap='gray'), plt.title('Ανίχνευση με Prewitt')
+    plt.subplot(2, 3, 5), plt.imshow(kirsch, cmap='gray'), plt.title('Ανίχνευση με Kirsch')
     plt.show()
 
     # Κλήση των συναρτήσεων log_method και canny_method
@@ -155,23 +151,27 @@ def main(image):
 
     # Εμφάνιση εικόνας cameraman.bmp με χρήση δεύτερων παραγώγων (LoG)
     plt.figure(figsize=(8, 4))
-    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Original')
-    plt.subplot(1, 2, 2), plt.imshow(log, cmap='gray'), plt.title('LoG')
+    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
+    plt.subplot(1, 2, 2), plt.imshow(log, cmap='gray'), plt.title('Ανίχνευση με LoG')
     plt.show()
 
     # Εμφάνιση εικόνας cameraman.bmp με χρήση της μεθόδου Canny
     plt.figure(figsize=(8, 4))
-    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Original')
-    plt.subplot(1, 2, 2), plt.imshow(canny, cmap='gray'), plt.title('Canny')
+    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
+    plt.subplot(1, 2, 2), plt.imshow(canny, cmap='gray'), plt.title('Ανίχνευση με Canny')
     plt.show()
 
     return
 
 
+# Φόρτωση εικόνας από τον φάκελο image\
 image_butterfly = cv2.imread('images/butterfly.jpg', cv2.IMREAD_GRAYSCALE)
 image_cameraman = cv2.imread('images/cameraman.bmp', cv2.IMREAD_GRAYSCALE)
 image_lenna = cv2.imread('images/lenna.bmp', cv2.IMREAD_GRAYSCALE)
 
-detection_butterfly = main(image_butterfly) 
-detection_cameraman = main(image_cameraman)
-detection_lenna = main(image_lenna)
+# Κλήση συνάρτησης main() με experiment = 7, variance = 1.5, threshold = 7
+detection_butterfly = main(image_butterfly, experiment = 7, variance = 1.5, threshold = 7) 
+# Κλήση συνάρτησης main() με experiment = 5, variance = 1.3, threshold = 5
+detection_cameraman = main(image_cameraman, experiment = 5, variance = 1.3, threshold = 5)
+# Κλήση συνάρτησης main() με experiment = 3, variance = 1.7, threshold = 3
+detection_lenna = main(image_lenna, experiment = 3, variance = 1.7, threshold = 3)
