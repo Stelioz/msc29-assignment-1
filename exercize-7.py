@@ -2,104 +2,231 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-def apply_first_derivative_methods(image):
-    # Convert image to 8-bit unsigned integer
-    image_uint8 = cv2.convertScaleAbs(image)
 
-    # Sobel
-    sobel_x = cv2.Sobel(image_uint8, cv2.CV_64F, 1, 0, ksize=3)
-    sobel_y = cv2.Sobel(image_uint8, cv2.CV_64F, 0, 1, ksize=3)
-    sobel_edges = np.sqrt(sobel_x**2 + sobel_y**2)
+# Συνάρτηση με χρήση πρώτων παραγώγων Sobel
+def sobel_method(image):
+    # Μετατροπή της εικόνας σε 8bit
+    image_8 = cv2.convertScaleAbs(image)
+
+    # Μάσκες του Sobel
+    PGr = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    PGc = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+
+    # Προσδιορισμός των συντελεστών των μασκών ανίχνευσης ακμών 
+    Gr = cv2.filter2D(image_8, cv2.CV_64F, PGr)
+    Gc = cv2.filter2D(image_8, cv2.CV_64F, PGc)
+    edges = np.sqrt(Gr**2 + Gc**2)
+
+    # Μετατροπή των ακμών σε 8bit για χρήση από τη μέθοδο κατωφλίωσης Otsu
+    edges_8 = cv2.convertScaleAbs(edges)
+    _, threshold = cv2.threshold(edges_8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return threshold
+
+
+# Συνάρτηση με χρήση πρώτων παραγώγων Roberts
+def roberts_method(image):
+    # Μετατροπή της εικόνας σε 8bit
+    image_8 = cv2.convertScaleAbs(image)
+
+    # Μάσκες του Roberts
+    PGr = np.array([[0, 0, -1], [0, 1, 0], [0, 0, 0]])
+    PGc = np.array([[-1, 0, 0], [0, 1, 0], [0, 0, 0]])
+
+    # Προσδιορισμός των συντελεστών των μασκών ανίχνευσης ακμών 
+    Gr = cv2.filter2D(image_8, cv2.CV_64F, PGr)
+    Gc = cv2.filter2D(image_8, cv2.CV_64F, PGc)
+    edges = np.sqrt(Gr**2 + Gc**2)
+
+    # Μετατροπή των ακμών σε 8bit για χρήση από τη μέθοδο κατωφλίωσης Otsu
+    edges_8 = cv2.convertScaleAbs(edges)
+    _, threshold = cv2.threshold(edges_8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return threshold
+
+
+# Συνάρτηση με χρήση πρώτων παραγώγων Prewitt
+def prewitt_method(image):
+    # Μετατροπή της εικόνας σε 8bit
+    image_8 = cv2.convertScaleAbs(image)
+
+    # Μάσκες του Prewitt
+    PGr = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
+    PGc = np.array([[1, 1, 1], [0, 0, 0], [-1, -1, -1]])
+
+    # Προσδιορισμός των συντελεστών των μασκών ανίχνευσης ακμών 
+    Gr = cv2.filter2D(image_8, cv2.CV_64F, PGr)
+    Gc = cv2.filter2D(image_8, cv2.CV_64F, PGc)
+    edges = np.sqrt(Gr**2 + Gc**2)
+
+    # Μετατροπή των ακμών σε 8bit για χρήση από τη μέθοδο κατωφλίωσης Otsu
+    edges_8 = cv2.convertScaleAbs(edges)
+    _, threshold = cv2.threshold(edges_8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return threshold
+
+
+# Συνάρτηση με χρήση πρώτων παραγώγων Krisch
+def kirsch_method(image, experiment):
+    # Μετατροπή της εικόνας σε 8bit
+    image_8 = cv2.convertScaleAbs(image)
+    
+    # Μάσκες του Krisch
+    masks = [
+        np.array([[-3, -3, -3], [-3, 0, -3], [5, 5, 5]]),
+        np.array([[-3, -3, -3], [5, 0, -3], [5, 5, -3]]),
+        np.array([[5, -3, -3], [5, 0, -3], [5, -3, -3]]),
+        np.array([[5, 5, -3], [5, 0, -3], [-3, -3, -3]]),
+        np.array([[5, 5, 5], [-3, 0, -3], [-3, -3, -3]]),
+        np.array([[-3, 5, 5], [-3, 0, 5], [-3, -3, -3]]),
+        np.array([[-3, -3, 5], [-3, 0, 5], [-3, -3, 5]]),
+        np.array([[-3, -3, -3], [-3, 0, 5], [-3, 5, 5]])
+    ]
+    
+    # Εφαρμογή των μασκών
+    responses = []
+    for mask in masks:
+        response = cv2.filter2D(image_8, cv2.CV_64F, mask)
+        responses.append(response)
+
+    # Προσδιορισμός των συντελεστών με επιλογή της μέγιστης τιμής
+    stack = np.stack(responses, axis=-1)
+    edges = np.max(stack, axis=-1)
 
     # Convert edges to 8-bit for Otsu's method
-    sobel_edges_uint8 = cv2.convertScaleAbs(sobel_edges)
-    _, sobel_thresholded = cv2.threshold(sobel_edges_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    edges_uint8 = cv2.convertScaleAbs(edges)
+    _, threshold = cv2.threshold(edges_uint8, experiment, 255, cv2.THRESH_BINARY)
 
-    # Roberts
-    roberts_x = cv2.filter2D(image_uint8, cv2.CV_64F, np.array([[1, 0], [0, -1]]))
-    roberts_y = cv2.filter2D(image_uint8, cv2.CV_64F, np.array([[0, 1], [-1, 0]]))
-    roberts_edges = np.sqrt(roberts_x**2 + roberts_y**2)
+    return threshold
 
-    # Convert edges to 8-bit for Otsu's method
-    roberts_edges_uint8 = cv2.convertScaleAbs(roberts_edges)
-    _, roberts_thresholded = cv2.threshold(roberts_edges_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    # Prewitt
-    prewitt_x = cv2.filter2D(image_uint8, cv2.CV_64F, np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]]))
-    prewitt_y = cv2.filter2D(image_uint8, cv2.CV_64F, np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]]))
-    prewitt_edges = np.sqrt(prewitt_x**2 + prewitt_y**2)
-
-    # Convert edges to 8-bit for Otsu's method
-    prewitt_edges_uint8 = cv2.convertScaleAbs(prewitt_edges)
-    _, prewitt_thresholded = cv2.threshold(prewitt_edges_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    # Kirsch
-    kirsch_edges = cv2.filter2D(image_uint8, cv2.CV_64F, np.array([[5, 5, 5], [-3, 0, -3], [-3, -3, -3]]))
-
-    # Convert edges to 8-bit for Otsu's method
-    kirsch_edges_uint8 = cv2.convertScaleAbs(kirsch_edges)
-    _, kirsch_thresholded = cv2.threshold(kirsch_edges_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    return sobel_thresholded, roberts_thresholded, prewitt_thresholded, kirsch_thresholded
-
-def apply_second_derivative_laplace(image, variance, threshold):
+def log_method(image, variance, threshold):
     # Apply LoG (Laplacian of Gaussian)
     blurred = cv2.GaussianBlur(image, (0, 0), variance)
     laplacian = cv2.Laplacian(blurred, cv2.CV_64F)
-    log_edges = np.zeros_like(laplacian, dtype=np.uint8)
-    log_edges[laplacian > threshold] = 255
+    edges = np.zeros_like(laplacian, dtype=np.uint8)
+    edges[laplacian > threshold] = 255
 
-    return log_edges
+    return edges
 
-def apply_canny(image):
+
+def canny_method(image):
     # Canny
-    edges_canny = cv2.Canny(image, 50, 150)
+    edges = cv2.Canny(image, 50, 150)
 
-    return edges_canny
+    return edges
 
-def main():
-    # Read the butterfly image
-    butterfly_image = cv2.imread('images/butterfly_g.jpg', cv2.IMREAD_GRAYSCALE)
+# Φόρτωση εικόνας από τον φάκελο image\
+image_butterfly = cv2.imread('images/butterfly.jpg', cv2.IMREAD_GRAYSCALE)
+print(image_butterfly.shape if image_butterfly is not None else "Image not loaded")
+# Experimentally determine optimal values for LoG
+experiment_butterfly = 30 # Adjust as needed
+variance_butterfly = 1.5  # Adjust as needed
+threshold_butterfly = 20  # Adjust as needed
 
-    # Apply first derivative methods
-    sobel, roberts, prewitt, kirsch = apply_first_derivative_methods(butterfly_image)
+# Κλήση των συναρτήσεων sobel_method, roberts_method, prewitt_method και kirsch_method
+sobel_butterfly = sobel_method(image_butterfly)
+roberts_butterfly = roberts_method(image_butterfly)
+prewitt_butterfly = prewitt_method(image_butterfly)
+kirsch_butterfly = kirsch_method(image_butterfly, experiment_butterfly)
 
-    # Display results for first derivative methods
-    plt.figure(figsize=(12, 8))
+# Εμφάνιση εικόνας butterfly.jpg με χρήση πρώτων παραγώγων
+plt.figure(figsize=(20, 10))
+plt.subplot(2, 3, 1), plt.imshow(image_butterfly, cmap='gray'), plt.title('Original')
+plt.subplot(2, 3, 2), plt.imshow(sobel_butterfly, cmap='gray'), plt.title('Sobel')
+plt.subplot(2, 3, 3), plt.imshow(roberts_butterfly, cmap='gray'), plt.title('Roberts')
+plt.subplot(2, 3, 4), plt.imshow(prewitt_butterfly, cmap='gray'), plt.title('Prewitt')
+plt.subplot(2, 3, 5), plt.imshow(kirsch_butterfly, cmap='gray'), plt.title('Kirsch')
+plt.show()
 
-    plt.subplot(2, 3, 1), plt.imshow(butterfly_image, cmap='gray'), plt.title('Original')
-    plt.subplot(2, 3, 2), plt.imshow(sobel, cmap='gray'), plt.title('Sobel')
-    plt.subplot(2, 3, 3), plt.imshow(roberts, cmap='gray'), plt.title('Roberts')
-    plt.subplot(2, 3, 4), plt.imshow(prewitt, cmap='gray'), plt.title('Prewitt')
-    plt.subplot(2, 3, 5), plt.imshow(kirsch, cmap='gray'), plt.title('Kirsch')
+# Κλήση των συναρτήσεων log_method και canny_method
+log_butterfly = log_method(image_butterfly, variance_butterfly, threshold_butterfly)
+canny_butterfly = canny_method(image_butterfly)
 
-    plt.show()
+# Εμφάνιση εικόνας butterfly.jpg με χρήση δεύτερων παραγώγων (LoG)
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1), plt.imshow(image_butterfly, cmap='gray'), plt.title('Original')
+plt.subplot(1, 2, 2), plt.imshow(log_butterfly, cmap='gray'), plt.title('LoG')
+plt.show()
 
-    # Experimentally determine optimal values for LoG
-    variance_optimal = 1.5  # Adjust as needed
-    threshold_optimal = 20  # Adjust as needed
+# Εμφάνιση εικόνας butterfly.jpg με χρήση της μεθόδου Canny
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1), plt.imshow(image_butterfly, cmap='gray'), plt.title('Original')
+plt.subplot(1, 2, 2), plt.imshow(canny_butterfly, cmap='gray'), plt.title('Canny')
+plt.show()
 
-    # Apply LoG
-    log_edges = apply_second_derivative_laplace(butterfly_image, variance_optimal, threshold_optimal)
 
-    # Display results for LoG
-    plt.figure(figsize=(8, 4))
+# Φόρτωση εικόνας από τον φάκελο image\
+image_cameraman = cv2.imread('images/cameraman.bmp', cv2.IMREAD_GRAYSCALE)
+experiment_cameraman = 30 # Adjust as needed
+variance_cameraman = 1.5  # Adjust as needed
+threshold_cameraman = 20  # Adjust as needed
 
-    plt.subplot(1, 2, 1), plt.imshow(butterfly_image, cmap='gray'), plt.title('Original')
-    plt.subplot(1, 2, 2), plt.imshow(log_edges, cmap='gray'), plt.title('LoG')
+# Κλήση των συναρτήσεων sobel_method, roberts_method, prewitt_method και kirsch_method
+sobel_cameraman = sobel_method(image_cameraman)
+roberts_cameraman = roberts_method(image_cameraman)
+prewitt_cameraman = prewitt_method(image_cameraman)
+kirsch_cameraman = kirsch_method(image_cameraman,experiment_cameraman)
 
-    plt.show()
+# Εμφάνιση εικόνας cameraman.bmp με χρήση πρώτων παραγώγων
+plt.figure(figsize=(20, 10))
+plt.subplot(2, 3, 1), plt.imshow(image_cameraman, cmap='gray'), plt.title('Original')
+plt.subplot(2, 3, 2), plt.imshow(sobel_cameraman, cmap='gray'), plt.title('Sobel')
+plt.subplot(2, 3, 3), plt.imshow(roberts_cameraman, cmap='gray'), plt.title('Roberts')
+plt.subplot(2, 3, 4), plt.imshow(prewitt_cameraman, cmap='gray'), plt.title('Prewitt')
+plt.subplot(2, 3, 5), plt.imshow(kirsch_cameraman, cmap='gray'), plt.title('Kirsch')
+plt.show()
 
-    # Apply Canny
-    edges_canny = apply_canny(butterfly_image)
+# Κλήση των συναρτήσεων log_method και canny_method
+log_cameraman = log_method(image_cameraman, variance_cameraman, threshold_cameraman)
+canny_cameraman = canny_method(image_cameraman)
 
-    # Display results for Canny
-    plt.figure(figsize=(8, 4))
+# Εμφάνιση εικόνας cameraman.bmp με χρήση δεύτερων παραγώγων (LoG)
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1), plt.imshow(image_cameraman, cmap='gray'), plt.title('Original')
+plt.subplot(1, 2, 2), plt.imshow(log_cameraman, cmap='gray'), plt.title('LoG')
+plt.show()
 
-    plt.subplot(1, 2, 1), plt.imshow(butterfly_image, cmap='gray'), plt.title('Original')
-    plt.subplot(1, 2, 2), plt.imshow(edges_canny, cmap='gray'), plt.title('Canny')
+# Εμφάνιση εικόνας cameraman.bmp με χρήση της μεθόδου Canny
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1), plt.imshow(image_cameraman, cmap='gray'), plt.title('Original')
+plt.subplot(1, 2, 2), plt.imshow(canny_cameraman, cmap='gray'), plt.title('Canny')
+plt.show()
 
-    plt.show()
 
-if __name__ == "__main__":
-    main()
+# Φόρτωση εικόνας από τον φάκελο image\
+image_lenna = cv2.imread('images/lenna.bmp', cv2.IMREAD_GRAYSCALE)
+experiment_lenna = 30 # Adjust as needed
+variance_lenna = 1.5  # Adjust as needed
+threshold_lenna = 20  # Adjust as needed
+
+# Κλήση των συναρτήσεων sobel_method, roberts_method, prewitt_method και kirsch_method
+sobel_lenna = sobel_method(image_lenna)
+roberts_lenna = roberts_method(image_lenna)
+prewitt_lenna = prewitt_method(image_lenna)
+kirsch_lenna = kirsch_method(image_lenna, experiment_lenna)
+
+# Εμφάνιση εικόνας lenna.bmp με χρήση πρώτων παραγώγων
+plt.figure(figsize=(20, 10))
+plt.subplot(2, 3, 1), plt.imshow(image_lenna, cmap='gray'), plt.title('Original')
+plt.subplot(2, 3, 2), plt.imshow(sobel_lenna, cmap='gray'), plt.title('Sobel')
+plt.subplot(2, 3, 3), plt.imshow(roberts_lenna, cmap='gray'), plt.title('Roberts')
+plt.subplot(2, 3, 4), plt.imshow(prewitt_lenna, cmap='gray'), plt.title('Prewitt')
+plt.subplot(2, 3, 5), plt.imshow(kirsch_lenna, cmap='gray'), plt.title('Kirsch')
+plt.show()
+
+# Κλήση των συναρτήσεων log_method και canny_method
+log_lenna = log_method(image_lenna, variance_lenna, threshold_lenna)
+canny_lenna = canny_method(image_lenna)
+
+# Εμφάνιση εικόνας lenna.bmp με χρήση δεύτερων παραγώγων (LoG)
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1), plt.imshow(image_lenna, cmap='gray'), plt.title('Original')
+plt.subplot(1, 2, 2), plt.imshow(log_lenna, cmap='gray'), plt.title('LoG')
+plt.show()
+
+# Εμφάνιση εικόνας lenna.bmp με χρήση της μεθόδου Canny
+plt.figure(figsize=(8, 4))
+plt.subplot(1, 2, 1), plt.imshow(image_lenna, cmap='gray'), plt.title('Original')
+plt.subplot(1, 2, 2), plt.imshow(canny_lenna, cmap='gray'), plt.title('Canny')
+plt.show()
