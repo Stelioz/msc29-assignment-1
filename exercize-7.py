@@ -107,7 +107,7 @@ def kirsch_method(image, experiment):
 # Συνάρτηση εύρεσης ακμών με χρήση δεύτερων παραγώγων (LoG)
 def log_method(image, variance, threshold):
     # Προσθήκη Γκαουσιανού φίλτρου στην εικόνα
-    blurred = cv2.GaussianBlur(image, (0, 0), variance)
+    blurred = cv2.GaussianBlur(image, (0, 0), variance**2)
 
     # Υπολογισμός του τελεστή Laplace
     laplacian = cv2.Laplacian(blurred, cv2.CV_64F)
@@ -124,38 +124,37 @@ def log_method(image, variance, threshold):
 # Συνάρτηση με χρήση του αλγορίθμου του Canny
 def canny_method(image):
     # Χρήση low = 50, high = 150 ως default τιμών
-    edges = cv2.Canny(image, 50, 150)
+    edges = cv2.Canny(image, 5, 150)
 
     return edges
 
 
-def main(image, experiment, variance, threshold):
+def illustrator(image, experiment, variance, threshold):
     # Κλήση των συναρτήσεων sobel_method, roberts_method, prewitt_method και kirsch_method
     sobel = sobel_method(image)
     roberts = roberts_method(image)
     prewitt = prewitt_method(image)
     kirsch = kirsch_method(image, experiment)
 
-    # Εμφάνιση εικόνας cameraman.bmp με χρήση πρώτων παραγώγων
-    plt.figure(figsize=(20, 10))
-    plt.subplot(2, 3, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
-    plt.subplot(2, 3, 2), plt.imshow(sobel, cmap='gray'), plt.title('Ανίχνευση με Sobel')
-    plt.subplot(2, 3, 3), plt.imshow(roberts, cmap='gray'), plt.title('Ανίχνευση με Roberts')
-    plt.subplot(2, 3, 4), plt.imshow(prewitt, cmap='gray'), plt.title('Ανίχνευση με Prewitt')
-    plt.subplot(2, 3, 5), plt.imshow(kirsch, cmap='gray'), plt.title('Ανίχνευση με Kirsch')
+    # Εμφάνιση εικόνας με χρήση πρώτων παραγώγων
+    plt.figure(figsize=(16, 8))
+    plt.subplot(2, 2, 1), plt.imshow(sobel, cmap='gray'), plt.title('Ανίχνευση με Sobel')
+    plt.subplot(2, 2, 2), plt.imshow(roberts, cmap='gray'), plt.title('Ανίχνευση με Roberts')
+    plt.subplot(2, 2, 3), plt.imshow(prewitt, cmap='gray'), plt.title('Ανίχνευση με Prewitt')
+    plt.subplot(2, 2, 4), plt.imshow(kirsch, cmap='gray'), plt.title('Ανίχνευση με Kirsch')
     plt.show()
 
     # Κλήση των συναρτήσεων log_method και canny_method
     log = log_method(image, variance, threshold)
     canny = canny_method(image)
 
-    # Εμφάνιση εικόνας cameraman.bmp με χρήση δεύτερων παραγώγων (LoG)
+    # Εμφάνιση εικόνας με χρήση δεύτερων παραγώγων (LoG)
     plt.figure(figsize=(8, 4))
     plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
     plt.subplot(1, 2, 2), plt.imshow(log, cmap='gray'), plt.title('Ανίχνευση με LoG')
     plt.show()
 
-    # Εμφάνιση εικόνας cameraman.bmp με χρήση της μεθόδου Canny
+    # Εμφάνιση εικόνας με χρήση του αλγορίθμου Canny
     plt.figure(figsize=(8, 4))
     plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
     plt.subplot(1, 2, 2), plt.imshow(canny, cmap='gray'), plt.title('Ανίχνευση με Canny')
@@ -165,13 +164,13 @@ def main(image, experiment, variance, threshold):
 
 
 # Φόρτωση εικόνας από τον φάκελο image\
-image_butterfly = cv2.imread('images/butterfly.jpg', cv2.IMREAD_GRAYSCALE)
+image_butterfly = cv2.imread('images/butterfly_g.jpg', cv2.IMREAD_GRAYSCALE)
 image_cameraman = cv2.imread('images/cameraman.bmp', cv2.IMREAD_GRAYSCALE)
 image_lenna = cv2.imread('images/lenna.bmp', cv2.IMREAD_GRAYSCALE)
 
-# Κλήση συνάρτησης main() με experiment = 7, variance = 1.5, threshold = 7
-detection_butterfly = main(image_butterfly, experiment = 7, variance = 1.5, threshold = 7) 
-# Κλήση συνάρτησης main() με experiment = 5, variance = 1.3, threshold = 5
-detection_cameraman = main(image_cameraman, experiment = 5, variance = 1.3, threshold = 5)
-# Κλήση συνάρτησης main() με experiment = 3, variance = 1.7, threshold = 3
-detection_lenna = main(image_lenna, experiment = 3, variance = 1.7, threshold = 3)
+# Κλήση συνάρτησης illustrator() με experiment = 7, variance = 1.3, threshold = 5
+detection_butterfly = illustrator(image_butterfly, experiment = 7, variance = 1.3, threshold = 5)
+# Κλήση συνάρτησης illustrator() με experiment = 5, variance = 1.1, threshold = 7
+detection_cameraman = illustrator(image_cameraman, experiment = 5, variance = 1.1, threshold = 7)
+# Κλήση συνάρτησης illustrator() με experiment = 3, variance = 1.3, threshold = 3
+detection_lenna = illustrator(image_lenna, experiment = 3, variance = 1.1, threshold = 3)
