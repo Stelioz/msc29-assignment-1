@@ -1,67 +1,92 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.fftpack import fft2, ifft2, fftshift, ifftshift
-from scipy.signal import butter, filtfilt
+from matplotlib import pyplot as plt
 
-# A. Load the image and add Gaussian noise
-image_path = "images/lenna.bmp"
-image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-noisy_image = image.astype(np.float32) + np.random.normal(0, 10, image.shape)
+# A. Feature Extraction
+def extract_features(image):
+    # Convert to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Εμφάνιση εικόνας πριν και μετά την προσθήκη θορύβου
-plt.figure(figsize=(10, 5))
+    # A1. Normalized brightness histogram
+    hist_brightness, _ = np.histogram(gray.flatten(), bins=256, range=[0, 256], density=True)
 
-plt.subplot(1, 2, 1)
-plt.imshow(image, cmap='gray')
-plt.title('Αρχική Εικόνα')
+    # A2. Local Binary Pattern (LBP) histogram
+    lbp = cv2.LBP_create()
+    lbp_values = lbp.compute(gray)[0]
+    hist_lbp, _ = np.histogram(lbp_values.flatten(), bins=256, range=[0, 256], density=True)
 
-plt.subplot(1, 2, 2)
-plt.imshow(noisy_image, cmap='gray')
-plt.title('Θορυβοποιημένη Εικόνα')
+    return np.concatenate([hist_brightness, hist_lbp])
 
-plt.show()
+# B. Dissimilarity Metrics
+def l1_distance(f1, f2):
+    return np.sum(np.abs(f1 - f2))
 
-# B. Apply low-pass Butterworth filters in the frequency domain
-def butterworth_filter(shape, order, cutoff_frequency):
-    rows, cols = shape
-    center_row, center_col = rows // 2, cols // 2
-    u = np.arange(0, rows)
-    v = np.arange(0, cols)
-    u, v = np.meshgrid(u, v)
-    distance = np.sqrt((u - center_row) ** 2 + (v - center_col) ** 2)
-    filter = 1 / (1 + (distance / cutoff_frequency) ** (2 * order))
-    return filter
+def l2_distance(f1, f2):
+    return np.sqrt(np.sum((f1 - f2) ** 2))
 
-orders = [3, 5, 7]
-cutoff_frequency = 0.1
-filtered_images = []
-
-for order in orders:
-    # Design the filter
-    b, a = butter(order, cutoff_frequency, btype='low', analog=False, output='ba')
+# C. Top-10 Similar Images
+def top_10_similar_images(query_features, feature_matrix, metric_function):
+    distances = []
+    for features in feature_matrix:
+        distances.append(metric_function(query_features, features))
     
-    # Apply the filter in the frequency domain
-    # fft_noisy_image = fft2(noisy_image)
-    # fft_filtered_image = fft_noisy_image * butterworth_filter(image.shape, order, cutoff_frequency)
-    
-    # Inverse Fourier transform
-    # filtered_image = np.real(ifft2(fft_filtered_image))
-    
-    # Alternatively, you can apply the filter directly in the spatial domain
-    filtered_image = filtfilt(b, a, noisy_image)
+    sorted_indices = np.argsort(distances)
 
-    filtered_images.append(filtered_image)
+    return sorted_indices[1:11]  # Exclude the query image itself
 
-# C. Display the results
-plt.figure(figsize=(15, 5))
-plt.subplot(1, len(orders) + 1, 1)
-plt.title("Original Image")
-plt.imshow(image, cmap='gray')
+# Load Flower Image Dataset
+dataset_path = 'path/to/flower_dataset'  # Replace with the actual path
+categories = ['Bougainvillea', 'Tulips', 'Orchids', 'Peonies', 'Hydrangeas',
+              'Lilies', 'Gardenias', 'Garden Roses', 'Daisies', 'Hibiscus']
 
-for i, order in enumerate(orders):
-    plt.subplot(1, len(orders) + 1, i + 2)
-    plt.title(f"Filtered Image (Order {order})")
-    plt.imshow(filtered_images[i], cmap='gray')
+# Randomly select 5 images from different categories
+random_query_images = []
 
-plt.show()
+for _ in range(5):
+    category = np.random.choice(categories)
+    image_files = os.listdir(f'{dataset_path}/{category}')
+    image_file = np.random.choice(image_files)
+    image_path = f'{dataset_path}/{category}/{image_file}'
+    query_image = cv2.imread(image_path)
+    random_query_images.append((query_image, category))
+
+# Extract features for each image in the dataset
+all_features = []
+labels = []
+
+for category in categories:
+    image_files = os.listdir(f'{dataset_path}/{category}')
+
+    for image_file in image_files:
+        image_path = f'{dataset_path}/{category}/{image_file}'
+        image = cv2.imread(image_path)
+        features = extract_features(image)
+        all_features.append(features)
+        labels.append(category)
+
+all_features_matrix = np.array(all_features)
+
+# C. Top-10 Similar Images for each query image
+for query_image, query_category in random_query_images:
+    print(f"\nQuery Image Category: {query_category}")
+
+    for feature_type in ['A1', 'A2']:
+        for metric_type in ['B1', 'B2']:
+            query_features = extract_features(query_image)
+
+            if feature_type == 'A1':
+                query_features = query_features[:256]  # Use only brightness histogram
+
+            if feature_type == 'A2':
+                query_features = query_features[256:]  # Use only LBP histogram
+
+            metric_function = l1_distance if metric_type == 'B1' else l2_distance
+
+            top_10_indices = top_10_similar_images(query_features, all_features_matrix, metric_function)
+
+            print(f"\nResults for Feature {feature_type} and Metric {metric_type}:")
+            for i, index in enumerate(top_10_indices, 1):
+                result_category = labels[index]
+                print(f"{i}. Category: {result_category}")
+
+# You can compare and evaluate the results here.
