@@ -1,5 +1,6 @@
 import os
 import cv2
+import csv
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
@@ -45,13 +46,8 @@ def l2_distance(f1, f2):
 
 
 # Ορισμός του path του dataset
-dataset_path = 'flowers/*.jpg'
+dataset_path = 'testflowers/*.jpg'
 image_paths = glob.glob(dataset_path)
-
-# Αρχικοποίηση των λιστών για αποθήκευση των δεδομένων
-brightness_histograms = []
-lbp_histograms = []
-labels = []
 
 # Βρόχος για φόρτωση κάθε εικόνας του dataset
 for i, image_path in enumerate(image_paths):
@@ -81,84 +77,127 @@ for i, image_path in enumerate(image_paths):
 
     plt.show()
 
-    print(f"Τα ιστογράμματα της εικόνας {image_filename} αποθηκεύτηκαν.")
+# Ορισμός του path των αποστάσεων L1 και L2
+distances = 'results/distances.csv' 
 
+# Υπολογισμός και αποθήκευση των αποτελεσμάτων σε ένα αρχείο CSV
+with open(distances, "w", newline="", encoding='utf-8') as csv_file:
+    # Δημιουργία του CSV αρχείου και των επικεφαλίδων
+    dis_results = csv.writer(csv_file)
+    dis_results.writerow(["Εικόνα 1", "Εικόνα 2", "L1", "L2"])
 
+    # Συγκρίνουμε ανά ζεύγη τις εικόνες
+    for i, dataset_path_1 in enumerate(image_paths):
+        for j, dataset_path_2 in enumerate(image_paths):
+            # Αποτροπή σύγκρισης μίας εικόνας με τον ευατό της
+            if i != j:
+                # Φόρτωση εικόνων και μετατροπή σε grayscale
+                image_1 = cv2.imread(dataset_path_1, cv2.IMREAD_GRAYSCALE)
+                image_2 = cv2.imread(dataset_path_2, cv2.IMREAD_GRAYSCALE)
 
-    # Extract label from the folder name using os.path
-    label = os.path.basename(os.path.dirname(image_path))
-    labels.append(label)
+                # Υπολογισμός των ιστογραμμάτων και των L1, L2
+                histogram_1 = normalized_brightness_histogram(image_1)
+                histogram_2 = normalized_brightness_histogram(image_2)
+                l1 = l1_distance(histogram_1, histogram_2)
+                l2 = l2_distance(histogram_1, histogram_2)
 
-    # Αποθήκευση των χαρακτηριστικών στις λίστες
+                # Εγγραφή των αποτελεσμάτων στο αρχείο CSV και εκτύπωσή τους
+                dis_results.writerow([f"{dataset_path_1}", f"{dataset_path_2}", f"{l1}", f"{l2}"])
+                print(f"Οι αποστάσεις μεταξύ των εικόνων {dataset_path_1} και {dataset_path_2} είναι L1: {l1} και L2: {l2}.")
+
+print(f"Τα αποτελέσματα αποθηκεύτηκαν στο αρχείο: ../{distances}")
+
+# Αρχικοποίηση των λιστών για αποθήκευση των δεδομένων
+brightness_histograms = []
+lbp_histograms = []
+categories = ['bougainvillea', 'tulips', 'orchids', 'peonies', 'hydrangeas',
+              'lilies', 'gardenias', 'gardenroses', 'daisies', 'hibiscus']
+
+# Calculate histograms for all images in the dataset
+for image_path in image_paths:
+    # Load the image and convert it to grayscale
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    
+    # Compute brightness and LBP histograms
+    brightness_histogram = normalized_brightness_histogram(image)
+    lbp_histogram = normalized_lbp_histogram(image)
+    
+    # Append histograms to the respective lists
     brightness_histograms.append(brightness_histogram)
-lbp_histograms.append(lbp_histogram)
+    lbp_histograms.append(lbp_histogram)
 
-# # Μετατροπή των λιστών σε πίνακες του NumPy
-# brightness_histograms = np.array(brightness_histograms)
-# lbp_histograms = np.array(lbp_histograms)
+# Randomly select 5 images from different categories
+unique_labels = np.unique(categories)
+selected_images = []
 
-# # Check if there are features available for plotting
-# if brightness_histograms.shape[0] > 0 and lbp_histograms.shape[0] > 0:
-#     # Randomly select 5 images from different categories
-#     unique_labels = np.unique(labels)
-#     selected_images = []
+for category in unique_labels:
+    labeled_images = np.where(np.array(categories) == category)[0]
+    if len(labeled_images) > 0:
+        selected_images.append(np.random.choice(labeled_images))
 
-#     for label in unique_labels:
-#         images_with_label = np.where(labels == label)[0]
-#         if len(images_with_label) > 0:
-#             selected_images.append(np.random.choice(images_with_label))
+# Perform retrieval for each query image and combination of features/metrics
+for query_image in selected_images:
+    query_brightness = brightness_histograms[query_image]
+    query_lbp = lbp_histograms[query_image]
 
-# # Perform retrieval for each query image and combination of features/metrics
-# for query_index in selected_images:
-#     query_brightness = brightness_histograms[query_index]
-#     query_lbp = lbp_histograms[query_index]
+    print(f"\nQuery Image: {image_paths[query_image]}")
 
-#     print(f"\nQuery Image: {image_paths[query_index]}")
+    feature_combinations = ['A1', 'A2']
+    metric_combinations = ['B1', 'B2']
 
-#     feature_combinations = ['A1', 'A2']
-#     metric_combinations = ['B1', 'B2']
+    for feature, metric in product(feature_combinations, metric_combinations):
+        distances = []
 
-#     for feature, metric in product(feature_combinations, metric_combinations):
-#         distances = []
+        for i, (brightness, lbp) in enumerate(zip(brightness_histograms, lbp_histograms)):
+            if i != query_image:  # Exclude the query image itself
+                if feature == 'A1':
+                    feature_vector = brightness
+                elif feature == 'A2':
+                    feature_vector = lbp
 
-#         for i, (brightness, lbp) in enumerate(zip(brightness_histograms, lbp_histograms)):
-#             if i != query_index:  # Exclude the query image itself
-#                 if feature == 'A1':
-#                     feature_vector = brightness
-#                 elif feature == 'A2':
-#                     feature_vector = lbp
-
-#                 if metric == 'B1':
-#                      distance = l1_distance(query_brightness, feature_vector)
-#                 elif metric == 'B2':
-#                     distance = distance(query_brightness, feature_vector)
+                if metric == 'B1':
+                     distance = l1_distance(query_brightness, feature_vector)
+                elif metric == 'B2':
+                    distance = l2_distance(query_brightness, feature_vector)
  
-#                 distances.append((distance, i))
+                distances.append((distance, i))
 
-#         # Sort distances and print top-10 retrieval results
-#         distances.sort()
-#         top_10_results = distances[:10]
-#         print(f"\n{feature} - {metric} Dissimilarity")
-#         for rank, (distance, result_index) in enumerate(top_10_results):
-#             print(f"Βαθμός {rank+1}: {image_paths[result_index]} (Απόσταση: {distance})")
+        # Sort distances and print top-10 retrieval results
+        distances.sort()
+        top_10_results = distances[:10]
+        print(f"\n{feature} - {metric} Dissimilarity")
+        for rank, (distance, result_index) in enumerate(top_10_results):
+            print(f"Βαθμός {rank+1}: {image_paths[result_index]} (Απόσταση: {distance})")
+
+# # Ορισμός του path των συγκρίσεων
+# comparisons = 'results/comparisons.csv' 
+
+# # Υπολογισμός και αποθήκευση των αποτελεσμάτων σε ένα αρχείο CSV
+# with open(comparisons, "w", newline="", encoding='utf-8') as csv_file:
+#     # Δημιουργία του CSV αρχείου και των επικεφαλίδων
+#     comp_results = csv.writer(csv_file)
+#     comp_results.writerow(["Εικόνα Αναζήτησης", "Εικόνα Σύγκρισης", "L1", "L2"])
+
+#     # Συγκρίνουμε ανά ζεύγη τις εικόνες
+#     for i, dataset_path_1 in enumerate(image_paths):
+#         for j, dataset_path_2 in enumerate(image_paths):
+#             # Αποτροπή σύγκρισης μίας εικόνας με τον ευατό της
+#             if i != j:
+#                 # Φόρτωση εικόνων και μετατροπή σε grayscale
+#                 image_1 = cv2.imread(dataset_path_1, cv2.IMREAD_GRAYSCALE)
+#                 image_2 = cv2.imread(dataset_path_2, cv2.IMREAD_GRAYSCALE)
+
+#                 # Υπολογισμός των ιστογραμμάτων και των L1, L2
+#                 histogram_1 = normalized_brightness_histogram(image_1)
+#                 histogram_2 = normalized_brightness_histogram(image_2)
+#                 l1 = l1_distance(histogram_1, histogram_2)
+#                 l2 = l2_distance(histogram_1, histogram_2)
+
+#                 # Εγγραφή των αποτελεσμάτων στο αρχείο CSV και εκτύπωσή τους
+#                 comp_results.writerow([f"{dataset_path_1}", f"{dataset_path_2}", f"{l1}", f"{l2}"])
+#                 print(f"Οι αποστάσεις μεταξύ των εικόνων {dataset_path_1} και {dataset_path_2} είναι L1: {l1} και L2: {l2}.")
+
+# print(f"Τα αποτελέσματα αποθηκεύτηκαν στο αρχείο: {distances_path}")
     
-# # Example: Calculate dissimilarity metrics for the first two feature vectors
-# f1_brightness = brightness_histograms[0]
-# f2_brightness = brightness_histograms[1]
-# l1_brightness_distance = l1_distance(f1_brightness, f2_brightness)
-# l2_brightness_distance = l2_distance(f1_brightness, f2_brightness)
 
-# f1_lbp = lbp_histograms[0]
-# f2_lbp = lbp_histograms[1]
-# l1_lbp_distance = l1_distance(f1_lbp, f2_lbp)
-# l2_lbp_distance = l2_distance(f1_lbp, f2_lbp)
-    
-# # Print or use the extracted features as needed
-# print("Brightness Histograms shape:", brightness_histograms.shape)
-# print("LBP Histograms shape:", lbp_histograms.shape)
 
-# # Print or use the calculated distances as needed
-# print("L1 Brightness Distance:", l1_brightness_distance)
-# print("L2 Brightness Distance:", l2_brightness_distance) 
-# print("L1 LBP Distance:", l1_lbp_distance)
-# print("L2 LBP Distance:", l2_lbp_distance)
