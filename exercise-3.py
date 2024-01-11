@@ -20,15 +20,15 @@ plt.figure(figsize=(15, 5))
 
 plt.subplot(1, 3, 1)
 plt.imshow(image, cmap='gray')
-plt.title('Αρχική Εικόνα')
+plt.title("Αρχική Εικόνα")
 
 plt.subplot(1, 3, 2)
 plt.imshow(np.log(magnitude_spectrum), cmap='gray')
-plt.title('Φάσμα Πλάτους')
+plt.title("Φάσμα Πλάτους")
 
 plt.subplot(1, 3, 3)
 plt.imshow(phase_spectrum, cmap='gray')
-plt.title('Φάσμα Φάσης')
+plt.title("Φάσμα Φάσης")
 
 plt.show()
 
@@ -40,7 +40,7 @@ plt.figure(figsize=(20, 20))
 
 plt.subplot(1, len(percentages) + 1, 1)
 plt.imshow(image, cmap='gray')
-plt.title('Αρχική Εικόνα')
+plt.title("Αρχική Εικόνα")
 
 for i, percentage in enumerate(percentages, 1):
     # Δημιουργία μάσκας για την αποκοπή των υψηλών συντελεστών
@@ -57,11 +57,11 @@ for i, percentage in enumerate(percentages, 1):
 
     # Υπολογισμός του μέσου τετραγωνικού σφάλματος (MSE)
     mse = np.mean((image_32 - reconstructed_image) ** 2)
-    print(f'{percentage * 100:.0f}% MSE: {mse:.2f}')
+    print(f"{percentage * 100:.0f}% MSE: {mse:.2f}")
 
     # Εμφάνιση των ανακατασκευασμένων εικόνων
     plt.subplot(1, len(percentages) + 1, i + 1)
     plt.imshow(reconstructed_image, cmap='gray')
-    plt.title(f'Εικόνα με {percentage * 100:.0f}% Συντελεστές\nMSE: {mse:.2f}')
+    plt.title(f"Εικόνα με {percentage * 100:.0f}% Συντελεστές\nMSE: {mse:.2f}")
 
 plt.show()

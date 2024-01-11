@@ -50,11 +50,11 @@ plt.figure(figsize=(10, 5))
 
 plt.subplot(1, 2, 1)
 plt.imshow(image, cmap='gray')
-plt.title('Αρχική Εικόνα')
+plt.title("Αρχική Εικόνα")
 
 plt.subplot(1, 2, 2)
 plt.imshow(noisy_image, cmap='gray')
-plt.title('Θορυβοποιημένη Εικόνα')
+plt.title("Θορυβοποιημένη Εικόνα")
 
 plt.show()
 
@@ -80,6 +80,6 @@ for i, order in enumerate(orders):
     # Εμφάνιση των φιλτραρισμένων εικόνων
     plt.subplot(1, len(orders), i + 1)
     plt.imshow(filtered_image, cmap='gray')
-    plt.title(f'Φιλτραρισμένη εικόνα {i + 1}.\n Φιλτρο Butterworth {order}ης ταξης')
+    plt.title(f"Φιλτραρισμένη εικόνα {i + 1}.\n Φιλτρο Butterworth {order}ης ταξης")
 
 plt.show()

@@ -138,10 +138,10 @@ def illustrator(image, experiment, variance, threshold):
 
     # Εμφάνιση εικόνας με χρήση πρώτων παραγώγων
     plt.figure(figsize=(16, 8))
-    plt.subplot(2, 2, 1), plt.imshow(sobel, cmap='gray'), plt.title('Ανίχνευση με Sobel')
-    plt.subplot(2, 2, 2), plt.imshow(roberts, cmap='gray'), plt.title('Ανίχνευση με Roberts')
-    plt.subplot(2, 2, 3), plt.imshow(prewitt, cmap='gray'), plt.title('Ανίχνευση με Prewitt')
-    plt.subplot(2, 2, 4), plt.imshow(kirsch, cmap='gray'), plt.title('Ανίχνευση με Kirsch')
+    plt.subplot(2, 2, 1), plt.imshow(sobel, cmap='gray'), plt.title("'Ανίχνευση με Sobel")
+    plt.subplot(2, 2, 2), plt.imshow(roberts, cmap='gray'), plt.title("Ανίχνευση με Roberts")
+    plt.subplot(2, 2, 3), plt.imshow(prewitt, cmap='gray'), plt.title("Ανίχνευση με Prewitt")
+    plt.subplot(2, 2, 4), plt.imshow(kirsch, cmap='gray'), plt.title("Ανίχνευση με Kirsch")
     plt.show()
 
     # Κλήση των συναρτήσεων log_method και canny_method
@@ -150,14 +150,14 @@ def illustrator(image, experiment, variance, threshold):
 
     # Εμφάνιση εικόνας με χρήση δεύτερων παραγώγων (LoG)
     plt.figure(figsize=(8, 4))
-    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
-    plt.subplot(1, 2, 2), plt.imshow(log, cmap='gray'), plt.title('Ανίχνευση με LoG')
+    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title("Αρχική Εικόνα")
+    plt.subplot(1, 2, 2), plt.imshow(log, cmap='gray'), plt.title("Ανίχνευση με LoG")
     plt.show()
 
     # Εμφάνιση εικόνας με χρήση του αλγορίθμου Canny
     plt.figure(figsize=(8, 4))
-    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title('Αρχική Εικόνα')
-    plt.subplot(1, 2, 2), plt.imshow(canny, cmap='gray'), plt.title('Ανίχνευση με Canny')
+    plt.subplot(1, 2, 1), plt.imshow(image, cmap='gray'), plt.title("Αρχική Εικόνα")
+    plt.subplot(1, 2, 2), plt.imshow(canny, cmap='gray'), plt.title("Ανίχνευση με Canny")
     plt.show()
 
     return

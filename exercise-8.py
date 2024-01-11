@@ -8,21 +8,21 @@ from itertools import product
 from skimage.feature import local_binary_pattern
 
 
-# Συνάρτηση για τον υπολογισμό του ιστόγραμματος φωτεινότητας
+# Συνάρτηση για τον υπολογισμό του ιστογράμματος φωτεινότητας
 def normalized_brightness_histogram(image):
-    # Δημιουργία του ιστόγραμματος
+    # Δημιουργία του ιστογράμματος
     histogram, _ = np.histogram(image.flatten(), 256, [0, 256])
     norm_histogram = histogram / histogram.sum()
 
     return norm_histogram
 
 
-# Συνάρτηση για τον υπολογισμό του ιστόγραμματος τιμών υφής
+# Συνάρτηση για τον υπολογισμό του ιστογράμματος τιμών υφής
 def normalized_lbp_histogram(image):
     # Υπολογισμός του LBP
     lbp = local_binary_pattern(image, P=8, R=1, method='uniform')
 
-    # Δημιουργία του ιστόγραμματος
+    # Δημιουργία του ιστογράμματος
     histogram, _ = np.histogram(lbp.flatten(), 256, [0, 256])
     norm_histogram = histogram / histogram.sum()
 
@@ -56,7 +56,7 @@ num_calc = len(image_paths)**2
 #  Αρχικοποίηση των λιστών για αποθήκευση των δεδομένων
 brightness_histograms = []
 lbp_histograms = []
-i = 250
+
 # Βρόχος για φόρτωση κάθε εικόνας του dataset
 for i, image_path in enumerate(image_paths):
     # Φόρτωση εικόνας και μετατροπή σε grayscale
@@ -92,17 +92,16 @@ for i, image_path in enumerate(image_paths):
     plt.savefig(plot_filename)
     print(f"Τα ιστογράμματα της εικόνας {image_path} αποθηκεύτηκε. Απομένουν {num_images - i - 1} υπολογισμοί.")
 
-    # plt.show()
-    plt.close()
+    # plt.show() # Τα plot εμφανίζονται real time
+    plt.close() # Τα plot κλείνουν λόγω χώρου στη μνήμη
 
 print(f"Όλα τα ιστογράμματα αποθηκεύτηκαν!\n")
 time.sleep(2)
 
-
-# Συγκρίνουμε ανά ζεύγη τις εικόνες
+# Σύγκριση ανά ζεύγη τις εικόνες
 for i, dataset_path_1 in enumerate(image_paths):
     for j, dataset_path_2 in enumerate(image_paths):
-        # Αποτροπή σύγκρισης μίας εικόνας με τον ευατό της
+        # Αποτροπή σύγκρισης μίας εικόνας με τον εαυτό της
         if i != j:
             # Φόρτωση εικόνων και μετατροπή σε grayscale
             image_1 = cv2.imread(dataset_path_1, cv2.IMREAD_GRAYSCALE)
@@ -117,7 +116,9 @@ for i, dataset_path_1 in enumerate(image_paths):
             # Εκτύπωση των αποτελεσμάτων
             print(f"Οι αποστάσεις των εικόνων {dataset_path_1} και {dataset_path_2} είναι L1: {l1} και L2: {l2}.")
             print(f"Απομένουν {num_calc - (i * len(image_paths) + j + 1)} υπολογισμοί.")
-  
+
+print(f"Όλες οι αποστάσεις υπολογίστηκαν!\n")
+time.sleep(2)
 
 # Τυχαία επιλογή 5 εικόνων από διαφορετικές κατηγορίες
 categories = ['bougainvillea', 'tulips', 'orchids', 'peonies', 'hydrangeas', 'lilies', 'gardenias', 'garden_roses', 'daisies', 'hibiscus']
@@ -145,7 +146,7 @@ for query_image in selected_images:
     for feature, metric in product(features, metrics):
         distances = []
 
-        # Προσπάλαση κάθε εικόνας του dataset
+        # Προσπέλαση κάθε εικόνας του dataset
         for i, (brightness, lbp) in enumerate(zip(brightness_histograms, lbp_histograms)):
             
             # Αποκλεισμός της εικόνας αναζήτησης
@@ -174,7 +175,6 @@ for query_image in selected_images:
         distances_values = [distance for distance, _ in top_10_results]
         mean_distance = np.mean(distances_values)
         all_distances[f"{feature} - {metric}"] = {'distances': distances_values, 'mean': mean_distance}
-
 
         # Εκτύπωση των αποτελεσματων για κάθε συνδιασμό χαρακτηριστικών - μετρικών
         print(f"Ανομοιότητα: {feature} - {metric}")
