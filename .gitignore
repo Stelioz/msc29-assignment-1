@@ -1,5 +1,7 @@
-exercise_8na.py
+# Test files
 test.py
 test2.py
-test3.py
-test4.py
+
+# Test folders
+testplots
+testdataset

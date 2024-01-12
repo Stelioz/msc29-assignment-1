@@ -46,7 +46,7 @@ def l2_distance(f1, f2):
 
 
 # Ορισμός του path του dataset
-dataset_path = 'dataset/*.jpg'
+dataset_path = 'testdataset/*.jpg'
 image_paths = glob.glob(dataset_path)
 
 # Ορισμός μετρικών για παρακολούθηση των υπολογισμών
@@ -88,7 +88,7 @@ for i, image_path in enumerate(image_paths):
     image_filename = os.path.basename(image_path)
 
     # Αποθήκευση των ιστογραμμάτων κάθε εικόνας στον φάκελο plots/
-    plot_filename = os.path.join("plots/", f"{os.path.splitext(image_filename)[0]}_plot.png")
+    plot_filename = os.path.join("testplots/", f"{os.path.splitext(image_filename)[0]}_plot.png")
     plt.savefig(plot_filename)
     print(f"Τα ιστογράμματα της εικόνας {image_path} αποθηκεύτηκε. Απομένουν {num_images - i - 1} υπολογισμοί.")
 
@@ -125,7 +125,7 @@ categories = ['bougainvillea', 'tulips', 'orchids', 'peonies', 'hydrangeas', 'li
 unique_labels = np.unique(categories)
 labels = np.array(categories)
 selected_images = []
-for label in unique_labels:
+for label in unique_labels[:5]:
     labeled_images = np.where(labels == label)[0]
     if len(labeled_images) > 0:
         selected_images.append(np.random.choice(labeled_images))
@@ -140,7 +140,7 @@ for query_image in selected_images:
     # Χαρακτηριστικά και μετρικές
     features = ['A1', 'A2']
     metrics = ['B1', 'B2']
-    all_distances = []
+    all_distances = {}
 
     # Υπολογισμός των συνδιασμών A1 - B1, A1 - B2, A2 - B1 και A2 - B2
     for feature, metric in product(features, metrics):
